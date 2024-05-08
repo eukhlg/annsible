@@ -1,0 +1,31 @@
+---
+- hosts: localhost # where to run playbook
+  gather_facts: yes # force to capture facts
+  become: yes 
+  become_user: root
+  become_method: sudo
+
+  tasks: 
+    - name: Install required system packages
+      apt:
+        pkg:
+          - ca-certificates
+          - curl
+        state: latest
+        update_cache: true
+    - name: Add Docker GPG apt Key
+      apt_key:
+        url: https://download.docker.com/linux/debian/gpg
+        state: present
+
+    - name: Add Docker Repository
+      apt_repository:
+        #repo: deb [arch=arm64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian   bookworm stable
+        repo: deb [arch=arm64] https://download.docker.com/linux/debian   bookworm stable
+        state: present
+
+    - name: Update apt and install docker-ce
+      apt:
+        name: docker-ce
+        state: latest
+        update_cache: true
