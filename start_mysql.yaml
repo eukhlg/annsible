@@ -1,0 +1,20 @@
+---
+- hosts: localhost # where to run playbook
+  gather_facts: yes # force to capture facts
+  become: yes # enable become
+  become_user: root # become root
+  become_method: sudo # elevate with sudo
+
+  tasks: 
+    - name: Install MariaDB
+      apt:
+        pkg:
+          - mariadb-server
+        state: latest
+        update_cache: true
+
+    - name: Start MariaDB Service
+      service:
+        name: mariadb
+        state: started
+        enabled: yes
