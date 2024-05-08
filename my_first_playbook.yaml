@@ -29,3 +29,5 @@
         name: docker-ce
         state: latest
         update_cache: true
+# The following command should be used to run this playbook correctly:
+# ansible-playbook -K  my_first_playbook.yaml
