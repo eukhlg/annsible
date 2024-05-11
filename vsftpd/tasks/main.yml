@@ -1,0 +1,29 @@
+---
+# tasks file for vsftpd
+    - name: "Install vsftpd"
+      apt:
+        name: vsftpd
+        state: present
+
+    - name: "Edit config"
+      lineinfile:
+        path: "/etc/vsftpd.conf"
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+      loop:
+      - {regexp: '^anonymous_enable=', line: 'anonymous_enable=NO' }
+      - {regexp: '^local_enable=', line: 'local_enable=YES' }
+      - {regexp: '^#\s*write_enable=', line: 'write_enable=YES' }
+      - {regexp: '^#\s*chroot_local_user=', line: 'chroot_local_user=YES' }
+      notify: service_restart
+
+    - name: Start service vsftpd, if not started
+      ansible.builtin.service:
+        name: vsftpd
+        state: started
+
+    - name: add/remove folder permissions
+      ansible.builtin.file:
+        path: /home/user1
+        state: touch
+        mode: u-w,g-w,o-w

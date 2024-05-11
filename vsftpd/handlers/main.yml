@@ -1,0 +1,7 @@
+---
+# handlers file for vsftpd
+  - name: service restart
+    listen: service_restart
+    service:
+      name: vsftpd
+      state: restarted

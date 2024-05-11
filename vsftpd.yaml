@@ -1,0 +1,8 @@
+---
+- hosts: test # where to run playbook
+  gather_facts: no
+  become: yes # enable become
+  become_user: root # become root
+  become_method: sudo # elevate with sudo
+  roles:
+   - vsftpd
