@@ -1,0 +1,38 @@
+- hosts: test # where to run playbook
+  gather_facts: yes # force to gather facts
+  become: yes # enable become
+  become_user: root # become root
+  become_method: sudo # elevate with sudo
+
+  tasks:
+    - name: "Install postfix"
+      apt:
+        name: postfix
+        state: present
+      tags: 
+       - init postfix
+    
+    - name: "Copy config"
+      copy:
+        src: "/home/evgeny/ansible/files/main.cf"
+        dest: /etc/postfix/main.cf
+        remote_src: yes  
+      notify: reload_postfix
+      tags:
+        - init postfix
+
+    - name: "Remove postfix"
+      apt:
+        name: postfix
+        state: absent
+        autoremove: yes
+        purge: yes
+      tags:
+        - drop postfix
+
+
+  handlers:
+    - name: reload postfix
+      listen: reload_postfix 
+      command: 'service postfix reload'
+
