@@ -1,0 +1,26 @@
+---
+# tasks file for dnsmasq
+    - name: "Install Dnsmasq"
+      apt:
+        name: dnsmasq
+        state: present
+
+    - name: "Configure Dnsmasq"
+      lineinfile:
+        path: "{{ configuration_file }}"
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+      loop:
+      - {regexp: '^#\s*domain-needed', line: 'domain-needed' }
+      - {regexp: '^#\s*bogus-priv', line: 'bogus-priv' }
+      - {regexp: '^#\s*strict-order', line: 'strict-order' }
+      - {regexp: '^#\s*server=/localnet/', line: "server=/localnet/{{ server_ip }}"}
+      - {regexp: '^#\s*interface', line: "interface={{ server_interface }}"}
+      - {regexp: '^#\s*bind-interfaces', line: 'bind-interfaces'}
+      - {regexp: '^#\s*#domain=example.com', line: 'domain=example.com'}
+      notify: service_restart
+
+    - name: Start service vsftpd, if not started
+      ansible.builtin.service:
+        name: dnsmasq
+        state: started

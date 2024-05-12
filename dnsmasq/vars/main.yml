@@ -1,0 +1,8 @@
+---
+# vars file for dnsmasq
+configuration_directory: "/etc/dnsmasq.d"
+additional_configuration_directory: "{{ configuration_directory }}/config"
+hosts_configuration: "{{ configuration_directory }}/hosts"
+configuration_file: "/etc/dnsmasq.conf"
+server_ip: "192.168.133.129"
+server_interface: "ens160"
