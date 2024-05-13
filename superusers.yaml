@@ -1,0 +1,27 @@
+---
+- name: "Play for creating users and allowing them fto sudo -i"
+  hosts: test # where to run playbook
+  gather_facts: true # force to capture facts
+  become: true # enable become
+  become_user: root # become root
+  become_method: sudo # elevate with sudo
+  vars:
+    users:
+      - "user2"
+      - "user3"
+
+  tasks:
+    - name: "Create user accounts"
+      ansible.builtin.user:
+        name: "{{ item }}"
+        groups: "sudo"
+        state: present
+      with_items: "{{ users }}"
+
+    - name: "Allow admin users to sudo -i"
+      ansible.builtin.lineinfile:
+        dest: "/etc/sudoers" # path: in version 2.3
+        state: "present"
+        regexp: "^#%sudo"
+        line: "%sudo  ALL=(ALL:ALL) ALL"
+        validate: '/usr/sbin/visudo -cf %s'
