@@ -1,0 +1,6 @@
+---
+# vars file for nginx_php-fpm
+http_host: "my_site"
+http_conf: "my_site.conf"
+http_port: "80"
+server_root: "/opt/nginx/ansible2"

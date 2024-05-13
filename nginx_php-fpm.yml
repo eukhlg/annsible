@@ -1,0 +1,9 @@
+---
+- name: Play for setting up nginx and php-fpm
+  hosts: test # where to run playbook
+  gather_facts: true # force to gather facts
+  become: true # enable become
+  become_user: root # become root
+  become_method: sudo # elevate with sudo
+  roles:
+    - nginx_php-fpm

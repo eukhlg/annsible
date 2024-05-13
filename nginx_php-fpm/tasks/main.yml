@@ -1,0 +1,43 @@
+---
+# tasks file for nginx_php-fpm
+- name: Install nginx and php-fpm
+  apt: name={{ item }} update_cache=yes state=latest
+  loop: [ 'nginx', 'php-fpm' ]
+
+- name: Sets Nginx conf file
+  template:
+    src: "files/nginx.conf.j2"
+    dest: "/etc/nginx/sites-available/{{ http_conf }}"
+
+# Nginx Configuration  
+- name: Sets Nginx conf file
+  template:
+    src: "files/nginx.conf.j2"
+    dest: "/etc/nginx/sites-available/{{ http_conf }}"
+  notify: Reload Nginx
+
+- name: Creates server root folder
+  file:
+    path: "{{ server_root }}"
+    state: directory
+
+- name: Enables new site
+  file:
+    src: "/etc/nginx/sites-available/{{ http_conf }}"
+    dest: "/etc/nginx/sites-enabled/{{ http_conf }}"
+    state: link
+  notify: Reload Nginx
+
+- name: Removes "default" site
+  file:
+    path: "/etc/nginx/sites-enabled/default"
+    state: absent
+  notify: Reload Nginx
+
+# Sets Up PHP Info Page
+- name: Sets Up PHP Info Page
+  template:
+    src: "files/index.php.j2"
+    dest: "{{ server_root + '/index.php'}}"
+  notify: Reload Nginx
+
