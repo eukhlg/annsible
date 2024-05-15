@@ -51,15 +51,15 @@
         autoremove: true
         purge: true
 
-    - name: Install PostgreeSQL
-      ansible.builtin.apt:
-        name: "postgresql-{{ postgresql_version }}"
-        state: present
-
     - name: Remove old data folder
       ansible.builtin.file:
         state: absent
         path: "{{ postgresql_data_folder }}"
+
+    - name: Install PostgreeSQL
+      ansible.builtin.apt:
+        name: "postgresql-{{ postgresql_version }}"
+        state: present
 
     - name: Crete new data folder
       ansible.builtin.file:
