@@ -26,11 +26,17 @@
     #  ansible.builtin.apt_key:
     #    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
     #    state: present
+    - name: Crete directory for GPG key
+      ansible.builtin.file:
+        path: /usr/share/postgresql-common/pgdg
+        state: directory
+        recurse: true
+        mode: u+rwx,g+rw,o+rw
     - name: Add GPG apt key
       ansible.builtin.get_url:
         url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
         dest: /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
-        mode: 755
+        mode: u+rwx,g+rw,o+rw
     - name: Add Postgresql Repository
       ansible.builtin.apt_repository:
         repo: deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt {{ ansible_distribution_release + '-pgdg' }} main
