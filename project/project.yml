@@ -11,7 +11,7 @@
         name:
           - ca-certificates
           - curl
-          - docker-ce
+          - docker
         state: present
         update_cache: true
 
