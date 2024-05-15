@@ -58,9 +58,8 @@
 
     - name: Remove old data folder
       ansible.builtin.file:
-        path: "{{ postgresql_data_folder }}"
         state: absent
-        recurse: true
+        path: "{{ postgresql_data_folder }}"
 
     - name: Crete new data folder
       ansible.builtin.file:
