@@ -15,7 +15,7 @@
         state: present
         update_cache: true
 
-- name: Install and configure PostgreeSQL
+- name: Install PostgreeSQL
   hosts: database
   gather_facts: true
   become: true
@@ -41,7 +41,47 @@
       ansible.builtin.apt_repository:
         repo: deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt {{ ansible_distribution_release + '-pgdg' }} main
         state: present
+    - name: Remove old versions
+      ansible.builtin.apt:
+        name: postgresql-*
+        state: absent
+        autoremove: true
+        purge: true
     - name: Install PostgreeSQL
       ansible.builtin.apt:
         name: "postgresql-{{ postgresql_version }}"
         state: present
+    - name: Crete new PostgreeSQL data folder
+      ansible.builtin.file:
+        path: "{{ postgresql_data_folder }}"
+        state: directory
+        recurse: true
+        owner: postgres
+        group: postgres
+        mode: u+rwx,g-rwx,o-rwx
+      notify:
+        - Stop PostgreSQL service
+        - Rsync to new data folder
+
+    - name: Set data directory in config
+      ansible.builtin.lineinfile:
+        dest: etc/postgresql/16/main/postgresql.conf
+        state: present
+        regexp: "^data_directory ="
+        line: "data_directory = '{{ postgresql_data_folder }}'" # /etc/postgresql/16/main/postgresql.conf
+      notify: Restart PostgreSQL service
+
+  handlers:
+    - name: Stop PostgreSQL service
+      ansible.builtin.service:
+        name: postgresql
+        state: stopped
+    - name: Rsync to new data folder
+      ansible.posix.synchronize:
+        src: "/var/lib/postgresql/{{ postgresql_version }}/main"
+        dest: "{{ postgresql_data_folder }}"
+        archive: true
+    - name: Restart PostgreSQL service
+      ansible.builtin.service:
+        name: postgresql
+        state: restarted
