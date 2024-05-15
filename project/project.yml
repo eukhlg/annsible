@@ -1,12 +1,12 @@
 ---
-- name: Docker installation
+- name: Docker Installation
   hosts: app
   gather_facts: false # force to capture facts
   become: true
   become_user: root
   become_method: sudo
   tasks:
-    - name: Install Docker
+    - name: Install Docker with apt
       ansible.builtin.package:
         name:
           - ca-certificates
@@ -15,7 +15,7 @@
         state: present
         update_cache: true
 
-- name: Install PostgreeSQL
+- name: PostgreeSQL Installation and configuration
   hosts: database
   gather_facts: true
   become: true
@@ -26,7 +26,7 @@
     #  ansible.builtin.apt_key:
     #    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
     #    state: present
-    - name: Crete directory for GPG key
+    - name: Create directory for GPG key
       ansible.builtin.file:
         path: /usr/share/postgresql-common/pgdg
         state: directory
@@ -39,7 +39,7 @@
         dest: /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
         mode: u+rwx,g+rw,o+rw
 
-    - name: Add Postgresql Repository
+    - name: Add PostgreSQL repository
       ansible.builtin.apt_repository:
         repo: deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt {{ ansible_distribution_release + '-pgdg' }} main
         state: present
@@ -56,12 +56,13 @@
         name: "postgresql-{{ postgresql_version }}"
         state: present
 
-    - name: Remove old folder
+    - name: Remove old data folder
       ansible.builtin.file:
         path: "{{ postgresql_data_folder }}"
         state: absent
+        recurse: true
 
-    - name: Crete new PostgreeSQL data folder
+    - name: Crete new data folder
       ansible.builtin.file:
         path: "{{ postgresql_data_folder }}"
         state: directory
@@ -70,9 +71,14 @@
         group: postgres
         mode: u+rwx,g-rwx,o-rwx
 
+    - name: Stop PostgreeSQL service
+      ansible.builtin.service:
+        name: postgresql
+        state: stopped
+
     - name: Rsync to new data folder
       ansible.posix.synchronize:
-        src: "/var/lib/postgresql/{{ postgresql_version }}/main"
+        src: "/var/lib/postgresql/"
         dest: "{{ postgresql_data_folder }}"
       delegate_to: vm01
 
@@ -81,8 +87,13 @@
         dest: /etc/postgresql/{{ postgresql_version }}/main/postgresql.conf # /etc/postgresql/16/main/postgresql.conf
         state: present
         regexp: "^data_directory ="
-        line: "data_directory = '{{ postgresql_data_folder }}'"
+        line: "data_directory = '{{ postgresql_data_folder }}/{{ postgresql_version }}/main'"
       notify: Restart PostgreSQL service
+
+    - name: Make sure service is started
+      ansible.builtin.service:
+        name: postgresql
+        state: started
 
   handlers:
     - name: Restart PostgreSQL service
