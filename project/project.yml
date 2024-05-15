@@ -74,13 +74,14 @@
       ansible.posix.synchronize:
         src: "/var/lib/postgresql/{{ postgresql_version }}/main"
         dest: "{{ postgresql_data_folder }}"
+      delegate_to: vm01
 
     - name: Set data directory in config
       ansible.builtin.lineinfile:
         dest: /etc/postgresql/{{ postgresql_version }}/main/postgresql.conf # /etc/postgresql/16/main/postgresql.conf
         state: present
         regexp: "^data_directory ="
-        line: "data_directory = '{{ postgresql_data_folder }}'" 
+        line: "data_directory = '{{ postgresql_data_folder }}'"
       notify: Restart PostgreSQL service
 
   handlers:
