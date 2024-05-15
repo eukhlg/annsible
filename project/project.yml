@@ -32,25 +32,30 @@
         state: directory
         recurse: true
         mode: u+rwx,g+rw,o+rw
+        
     - name: Add GPG apt key
       ansible.builtin.get_url:
         url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
         dest: /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
         mode: u+rwx,g+rw,o+rw
+
     - name: Add Postgresql Repository
       ansible.builtin.apt_repository:
         repo: deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt {{ ansible_distribution_release + '-pgdg' }} main
         state: present
+
     - name: Remove old versions
       ansible.builtin.apt:
         name: postgresql-*
         state: absent
         autoremove: true
         purge: true
+
     - name: Install PostgreeSQL
       ansible.builtin.apt:
         name: "postgresql-{{ postgresql_version }}"
         state: present
+
     - name: Crete new PostgreeSQL data folder
       ansible.builtin.file:
         path: "{{ postgresql_data_folder }}"
@@ -59,9 +64,13 @@
         owner: postgres
         group: postgres
         mode: u+rwx,g-rwx,o-rwx
-      notify:
-        - Stop PostgreSQL service
-        - Rsync to new data folder
+
+    - name: Rsync to new data folder
+      ansible.posix.synchronize:
+        src: "/var/lib/postgresql/{{ postgresql_version }}/main"
+        dest: "{{ postgresql_data_folder }}"
+        archive: true
+      notify: Restart PostgreSQL service
 
     - name: Set data directory in config
       ansible.builtin.lineinfile:
@@ -72,15 +81,6 @@
       notify: Restart PostgreSQL service
 
   handlers:
-    - name: Stop PostgreSQL service
-      ansible.builtin.service:
-        name: postgresql
-        state: stopped
-    - name: Rsync to new data folder
-      ansible.posix.synchronize:
-        src: "/var/lib/postgresql/{{ postgresql_version }}/main"
-        dest: "{{ postgresql_data_folder }}"
-        archive: true
     - name: Restart PostgreSQL service
       ansible.builtin.service:
         name: postgresql
