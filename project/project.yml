@@ -65,10 +65,10 @@
 
     - name: Set data directory in config
       ansible.builtin.lineinfile:
-        dest: etc/postgresql/16/main/postgresql.conf
+        dest: etc/postgresql/{{ postgresql_version }}/main/postgresql.conf # /etc/postgresql/16/main/postgresql.conf
         state: present
         regexp: "^data_directory ="
-        line: "data_directory = '{{ postgresql_data_folder }}'" # /etc/postgresql/16/main/postgresql.conf
+        line: "data_directory = '{{ postgresql_data_folder }}'" 
       notify: Restart PostgreSQL service
 
   handlers:
