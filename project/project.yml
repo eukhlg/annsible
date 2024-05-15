@@ -32,7 +32,7 @@
         state: directory
         recurse: true
         mode: u+rwx,g+rw,o+rw
-        
+
     - name: Add GPG apt key
       ansible.builtin.get_url:
         url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
@@ -55,6 +55,11 @@
       ansible.builtin.apt:
         name: "postgresql-{{ postgresql_version }}"
         state: present
+
+    - name: Remove old folder
+      ansible.builtin.file:
+        path: "{{ postgresql_data_folder }}"
+        state: absent
 
     - name: Crete new PostgreeSQL data folder
       ansible.builtin.file:
