@@ -7,8 +7,8 @@
   become_method: sudo
   tasks:
     - name: Install Docker
-      ansible.builtin.apt:
-        pkg:
+      ansible.builtin.package:
+        name:
           - ca-certificates
           - curl
           - docker-ce
