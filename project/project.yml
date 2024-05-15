@@ -43,5 +43,5 @@
         state: present
     - name: Install PostgreeSQL
       ansible.builtin.apt:
-        name: {'postgresql=' + postgresql_version }
+        name: "postgresql={{ postgresql_version }}"
         state: present
