@@ -1,0 +1,41 @@
+---
+- name: Docker installation
+  hosts: app
+  gather_facts: false # force to capture facts
+  become: true
+  become_user: root
+  become_method: sudo
+  tasks:
+    - name: Install Docker
+      ansible.builtin.apt:
+        pkg:
+          - ca-certificates
+          - curl
+          - docker-ce
+        state: present
+        update_cache: true
+
+- name: Install and configure PostgreeSQL
+  hosts: database
+  gather_facts: true
+  become: true
+  become_user: root
+  become_method: sudo
+  tasks:
+    # - name: Add GPG apt key
+    #  ansible.builtin.apt_key:
+    #    url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+    #    state: present
+    - name: Add GPG apt key
+      ansible.builtin.get_url:
+        url: https://www.postgresql.org/media/keys/ACCC4CF8.asc
+        dest: /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
+        mode: 755
+    - name: Add Postgresql Repository
+      ansible.builtin.apt_repository:
+        repo: deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt {{ ansible_distribution_release + '-pgdg' }} main
+        state: present
+    - name: Install PostgreeSQL
+      ansible.builtin.apt:
+        name: postgresql={ postgresql_version }
+        state: present

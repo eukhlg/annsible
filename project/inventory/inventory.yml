@@ -1,0 +1,21 @@
+# Добавить в inventory информацию о созданных машинах. vm2 и vm3 должны быть в группе app, vm1 — в группе database и web.
+app:
+  hosts:
+    vm02:
+      ansible_host: 10.131.0.26
+      ansible_user: evgeny
+    vm03:
+      ansible_host: 10.131.0.17
+      ansible_user: evgeny
+database:
+  hosts:
+    vm01:
+      ansible_host: 10.131.0.25
+  vars:
+    postgresql_data_folder: /opt/postgresql
+    postgresql_version: 16.3
+web:
+  hosts:
+    vm01:
+      ansible_host: 10.131.0.25
+      ansible_user: evgeny
