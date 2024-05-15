@@ -71,11 +71,7 @@
         mode: u+rwx,g-rwx,o-rwx
 
     - name: Rsync to new data folder
-      ansible.posix.synchronize:
-        src: "/var/lib/postgresql/{{ postgresql_version }}/main"
-        dest: "{{ postgresql_data_folder }}"
-        archive: true
-      notify: Restart PostgreSQL service
+      ansible.builtin.command: "rsync -av /var/lib/postgresql/{{ postgresql_version }}/main {{ postgresql_data_folder }}"
 
     - name: Set data directory in config
       ansible.builtin.lineinfile:
